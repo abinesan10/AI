@@ -19,7 +19,7 @@ from users import views
 urlpatterns = [
     path('AMS/API/user/register',views.register),
     path('AMS/API/user/login',views.login),
-    # path('AMS/API/user/logout',views.logout),
+    path('AMS/API/user/logout',views.logout),
     # path('AMS/API/change/password',views.change_password),
     # path('AMS/API/forgot/password/token',views.forgot_password_token),
     # path('AMS/API/password/token/validation',views.forgot_password_validation),

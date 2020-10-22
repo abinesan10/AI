@@ -108,7 +108,6 @@ def logout(request):
             userIdCheck = registerInfo.objects.filter(id=userId)
             if userIdCheck.exists():
                 logout = registerInfo.objects.filter(id=userId).update(onlineStatus="offline")
-                logout = myProfileInfo.objects.filter(id=userId).update(onlineStatus="offline")
                 data = {"status":"success","message":"logged out successfully"}
             else:
                 data = {"status":"failure","message":"user not exists"}
