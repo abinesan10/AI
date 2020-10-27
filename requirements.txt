@@ -1,0 +1,8 @@
+django_extensions
+django-cors-headers
+djangorestframework
+dongo
+bcrypt
+jsonfield
+# sudo apt-get install python3-dev default-libmysqlclient-dev
+# pip3 install mysqlclient

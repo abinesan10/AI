@@ -16,13 +16,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from users import views
+
+
 urlpatterns = [
     path('AMS/API/user/register',views.register),
     path('AMS/API/user/login',views.login),
     path('AMS/API/user/logout',views.logout),
+    path('AMS/API/upload/crack/images',views.Crack_photo),
+    path('AMS/API/upload/noncroack/images',views.Noncrack_photo),
+    path('AMS/API/train/images',views.train_images),
+
     # path('AMS/API/change/password',views.change_password),
     # path('AMS/API/forgot/password/token',views.forgot_password_token),
     # path('AMS/API/password/token/validation',views.forgot_password_validation),
     # path('AMS/API/forgot/password/reset',views.forgot_password_reset),
 ]
+
     

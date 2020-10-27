@@ -30,6 +30,15 @@ import uuid
 import hashlib
 import requests
 
+################
+import numpy as np
+import os
+import cv2
+# %matplotlib inline
+import matplotlib.pyplot as plt
+import pickle
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
 
 #### Code start's below
 
@@ -114,4 +123,101 @@ def logout(request):
             return JsonResponse(data)
         except Exception as error:
             return JsonResponse({"status":"failue","message":str(error)})          
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def Noncrack_photo(request):
+    image_type = request.POST["ImageType"]   
+    timeStamp = datetime.now().timestamp()
+    filePath = FileSystemStorage(location='/var/www/domain2.com/public_html/448/train/NonCracks')
+    timeStamp = str(timeStamp).replace('.','_')
+   
+    fileUrl = []
+    for i in request.FILES:
+        file = request.FILES[i]
+        # fileName = str(userId)+"_"+str(timeStamp)+str(file)
+        fileName = get_random_string(5)+str(timeStamp)+".png"
+        #print(fileName,"333333333")
+        path = filePath.save(fileName, ContentFile(file.read()))
+        fileUrl.append(fileName)
+    img = photoGallery(image_type=image_type,profile_picture=fileUrl)
+    img.save()
+    data = {"status":"success","message":"Image uploaded successfully"}
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def Crack_photo(request):
+    image_type = request.POST["ImageType"]   
+    timeStamp = datetime.now().timestamp()
+    filePath = FileSystemStorage(location='/var/www/domain2.com/public_html/448/train/Cracks')
+    timeStamp = str(timeStamp).replace('.','_')
+    fileUrl = []
+    for i in request.FILES:
+        file = request.FILES[i]
+        # fileName = str(userId)+"_"+str(timeStamp)+str(file)
+        fileName = get_random_string(5)+str(timeStamp)+".png"
+        #print(fileName,"333333333")
+        path = filePath.save(fileName, ContentFile(file.read()))
+        fileUrl.append(fileName)
+    img = photoGallery(image_type=image_type,profile_picture=fileUrl)
+    img.save()
+    data = {"status":"success","message":"Image uploaded successfully"}
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def train_images(request):
+    DIRECTORY = '/var/www/domain2.com/public_html/448/train'
+    CATEGORIES = ['Cracks', 'NonCracks']
+    data = []
+    for category in CATEGORIES:
+        path = os.path.join(DIRECTORY, category)
+        for img in os.listdir(path):
+            img_path = os.path.join(path, img)
+            label = CATEGORIES.index(category)
+            arr = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+            new_arr = cv2.resize(arr, (60, 60))
+            data.append([new_arr, label])
+    random.shuffle(data)
+    X = []
+    y = []
+    for features, label in data:
+        X.append(features)
+        y.append(label)
+    X = np.array(X)
+    y = np.array(y)
+    pickle.dump(X, open('X.pkl', 'wb'))
+    pickle.dump(y, open('y.pkl', 'wb'))
+    X = pickle.load(open('X.pkl', 'rb'))
+    y = pickle.load(open('y.pkl', 'rb'))
+    X = X/255
+    X = X.reshape(-1, 60, 60, 1)
+    model = Sequential()
+
+    model.add(Conv2D(64, (3,3), activation = 'relu'))
+    model.add(MaxPooling2D((2,2)))
+
+    model.add(Conv2D(64, (3,3), activation = 'relu'))
+    model.add(MaxPooling2D((2,2)))
+
+    model.add(Flatten())
+
+    model.add(Dense(128, input_shape = X.shape[1:], activation = 'relu'))
+
+    model.add(Dense(2, activation = 'softmax'))
+
+    model.compile(optimizer='adam',
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy'])
+
+    model.fit(X, y, epochs=5, validation_split=0.1)
+    data = {"status":"success","message":"Images trained successfully"}
+    return JsonResponse(data)
+
 

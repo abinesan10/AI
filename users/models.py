@@ -5,6 +5,9 @@ import jsonfield
 from django.db.models import Q
 # Create your models here.
 
+
+
+
 class registerInfo(models.Model):
     email = models.CharField(max_length=80,null=True)
     password = models.CharField(max_length=80)
@@ -15,6 +18,10 @@ class registerInfo(models.Model):
     onlineStatus = models.CharField(default="offline",max_length=30,null=True)
     mobileNumber = models.CharField(max_length=30,null=True)
     approval_status = models.CharField(default="pending",max_length=30,null=True)
-    mobileVerifiedStatus=models.IntegerField(null=True)
+    mobileCountryCode=models.CharField(max_length=30,null=True)
 
-    
+
+class photoGallery(models.Model):
+    dates=models.DateTimeField(auto_now_add=True, blank=True)
+    profile_picture = jsonfield.JSONField(null=True)
+    image_type = models.CharField(max_length=80)

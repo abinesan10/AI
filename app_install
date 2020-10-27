@@ -1,0 +1,25 @@
+sudo apt-get update 
+echo "done#####################################################" 
+sudo apt-get install -y python3-pip
+echo "done#####################################################" 
+sudo apt-get install -y python3-django
+echo "done#####################################################" 
+sudo apt install -y mongodb
+echo "done#####################################################" 
+sudo systemctl start mongodb
+echo "done#####################################################" 
+sudo pip3 install -y django_extensions
+echo "done#####################################################" 
+sudo pip3 install -y django-cors-headers
+echo "done#####################################################" 
+sudo pip3 install -y djangorestframework
+echo "done#####################################################" 
+sudo pip3 install -y bcrypt
+echo "done#####################################################"
+sudo pip3 install --upgrade pip
+echo "done#####################################################" 
+sudo pip3 install --upgrade tensorflow
+echo "done#####################################################" 
+sudo pip3 install keras
+echo "done#####################################################" 
+sudo pip3 install opencv-python
