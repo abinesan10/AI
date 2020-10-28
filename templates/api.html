@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.collapsible {
+  background-color: #6cbf16;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  padding: 8px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.collapsible:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "\2212";
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+}
+</style>
+</head>
+<body>
+
+<h2>API COLLECTIONS </h2>
+<h2>Download Postman Collecton : https://www.getpostman.com/collections/edcbe5160cb6fd629cb3</h2>
+<button class="collapsible">Login POST</button>
+<div class="content">
+  <p><b>URL : http://localhost:8000/AMS/API/user/login</b></p>
+  <p><b>Pay Load: {"email":"test@gmail.com","password":"Test@123"}</b></p>
+</div>
+<button class="collapsible">Register POST</button>
+<div class="content">
+  <p><b>URL : http://localhost:8000/AMS/API/user/register</b></p>
+  <p><b>Pay Load: {"email":"test@gmail.com","password":"Test@123","fullName":"test7","mobileCountryCode":"+91","mobileNumber":"+917776677665"}</b></p>
+</div>
+<button class="collapsible">Logout POST</button>
+<div class="content">
+  <p><b>URL : http://localhost:8000/AMS/API/user/logout</b></p>
+  <p><b>Pay Load: {"UserId":"1"}</b></p>
+</div>
+<button class="collapsible">Crack_image_upload POST Multi Images in form data</button>
+<div class="content">
+  <p><b>URL : http://127.0.0.1:8000/AMS/API/upload/noncrack/images</b></p>
+  <p><b>Pay Load: {"email":"test@gmail.com","password":"Test@123"}</b></p>
+</div>
+
+
+
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+</script>
+
+</body>
+</html>

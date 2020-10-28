@@ -16,6 +16,8 @@ from django.core.files.storage import FileSystemStorage
 from .serializers import *
 from .models import *
 from django import forms 
+from django.shortcuts import render
+
 # from django.db import connection
 
 
@@ -50,6 +52,11 @@ def get_random_string(length):
     # put your letters in the following string
     sample_letters = 'abcdef123j4k5l6m7n8o9p0qgrhsitxyzuvw'
     return (''.join((random.choice(sample_letters) for i in range(length))))
+
+
+def api_list(request,pwd):
+    # put your letters in the following string
+    return render(request, 'api.html')
 
 subject = "xxxxxxx"
 message = "xxxxxxxxxx"
