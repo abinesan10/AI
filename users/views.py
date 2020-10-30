@@ -31,6 +31,7 @@ import bcrypt
 import uuid
 import hashlib
 import requests
+import requests, zipfile, io
 
 ################
 import numpy as np
@@ -137,19 +138,36 @@ def logout(request):
 def Noncrack_photo(request):
     image_type = request.POST["ImageType"]   
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='/var/www/domain2.com/public_html/448/train/NonCracks')
+    filePath = FileSystemStorage(location='var/html/noncrack')
     timeStamp = str(timeStamp).replace('.','_')
-   
+    # r = requests.get("https://omexon.co/images1.zip")
+    # z = zipfile.ZipFile(io.BytesIO(r.content))
+    print('Extracting all the files now...') 
+    # z.extractall("D:/Road crack Colan/images/zip")
+    print('Done!') 
     fileUrl = []
-    for i in request.FILES:
-        file = request.FILES[i]
-        # fileName = str(userId)+"_"+str(timeStamp)+str(file)
-        fileName = get_random_string(5)+str(timeStamp)+".png"
-        #print(fileName,"333333333")
-        path = filePath.save(fileName, ContentFile(file.read()))
-        fileUrl.append(fileName)
-    img = photoGallery(image_type=image_type,profile_picture=fileUrl)
-    img.save()
+    # print(request.FILES,"sdsddddddd")
+    for  i in request.FILES:
+        file = request.FILES[i] 
+        print(file,"ddddddddddddddd")
+        # print(file.name,"dddddddddddddddddddddddddddd")
+        extensions=['.png','.jpg']
+        if file.name.endswith(tuple(extensions)):
+            fileName = get_random_string(5)+str(timeStamp)+".png"
+            #print(fileName,"333333333")
+            path = filePath.save(fileName, ContentFile(file.read()))
+            fileUrl.append(fileName)
+            img = photoGallery(image_type=image_type,profile_picture=fileUrl)
+            img.save()
+        
+        if file.name.endswith('.zip'):
+            print ('File is a ZIP')
+            zip_file = zipfile.ZipFile(file, 'r')
+            for file in zip_file.namelist():    
+                if file.endswith(tuple(extensions)):
+                    # print("dddddddd")
+                    zip_file.extract(file,'D:/Road crack Colan/images/crack')  
+            zip_file.close()
     data = {"status":"success","message":"Image uploaded successfully"}
     return JsonResponse(data)
 
@@ -160,28 +178,40 @@ def Noncrack_photo(request):
 def Crack_photo(request):
     image_type = request.POST["ImageType"]   
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='/var/www/domain2.com/public_html/448/train/Cracks')
+    filePath = FileSystemStorage(location='var/www/html/crack')
     timeStamp = str(timeStamp).replace('.','_')
     fileUrl = []
-    for i in request.FILES:
-        file = request.FILES[i]
-        # fileName = str(userId)+"_"+str(timeStamp)+str(file)
-        fileName = get_random_string(5)+str(timeStamp)+".png"
-        #print(fileName,"333333333")
-        path = filePath.save(fileName, ContentFile(file.read()))
-        fileUrl.append(fileName)
-    img = photoGallery(image_type=image_type,profile_picture=fileUrl)
-    img.save()
+    # print(request.FILES,"sdsddddddd")
+    for  i in request.FILES:
+        file = request.FILES[i] 
+        print(file,"ddddddddddddddd")
+        # print(file.name,"dddddddddddddddddddddddddddd")
+        extensions=['.png','.jpg']
+        if file.name.endswith(tuple(extensions)):
+            fileName = get_random_string(5)+str(timeStamp)+".png"
+            #print(fileName,"333333333")
+            path = filePath.save(fileName, ContentFile(file.read()))
+            fileUrl.append(fileName)
+            img = photoGallery(image_type=image_type,profile_picture=fileUrl)
+            img.save()
+        
+        if file.name.endswith('.zip'):
+            print ('File is a ZIP')
+            zip_file = zipfile.ZipFile(file, 'r')
+            for file in zip_file.namelist():    
+                if file.endswith(tuple(extensions)):
+                    # print("dddddddd")
+                    zip_file.extract(file,'D:/Road crack Colan/images/crack')  
+            zip_file.close()
     data = {"status":"success","message":"Image uploaded successfully"}
     return JsonResponse(data)
-
 
 @csrf_exempt
 #@validate
 @require_http_methods(["GET"])
 def train_images(request):
-    DIRECTORY = '/var/www/domain2.com/public_html/448/train'
-    CATEGORIES = ['Cracks', 'NonCracks']
+    DIRECTORY = '/var/www/html'
+    CATEGORIES = ['crack', 'noncrack']
     data = []
     for category in CATEGORIES:
         path = os.path.join(DIRECTORY, category)
@@ -228,3 +258,65 @@ def train_images(request):
     return JsonResponse(data)
 
 
+
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def list_noncrack_images(request):
+    a=[]
+    for i in  os.listdir('/var/www/html/noncrack'):
+        # print(i)
+        url="http://44.233.138.4/noncrack/"+i
+        print(url)
+        a.append(url)
+    
+    data = {"status":"success","message":"File Name","data":a}
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def crack_images(request):
+    a=[]
+    for i in  os.listdir('/var/www/html/crack'):
+        # print(i)
+        url="http://44.233.138.4/crack/"+i
+        print(url)
+        a.append(url)
+    
+    data = {"status":"success","message":"File Name","data":a}
+    return JsonResponse(data)
+
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def crack_images_delete(request):
+    js = json.loads(request.body)
+    for i in js["fileName"] :
+        filepath="/var/www/html/crack/"+i
+        print(filepath)
+        os.remove(filepath)
+    data = {"status":"success","message":"Files Deleted successfully"}
+    return JsonResponse(data)
+
+
+
+
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def noncrack_images_delete(request):
+    js = json.loads(request.body)
+    for i in js["fileName"] :
+        filepath="/var/www/html/noncrack/"+i
+        print(filepath)
+        os.remove(filepath)
+    data = {"status":"success","message":"Files Deleted successfully"}
+    return JsonResponse(data)

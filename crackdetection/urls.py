@@ -26,6 +26,12 @@ urlpatterns = [
     path('AMS/API/upload/noncroack/images',views.Noncrack_photo),
     path('AMS/API/train/images',views.train_images),
     path('AMS/API/<int:pwd>',views.api_list),
+    path('AMS/API/list/noncrack/images',views.list_noncrack_images),
+    path('AMS/API/list/crack/images',views.crack_images),
+    path('AMS/API/delete/crack/images',views.crack_images_delete),
+    path('AMS/API/delete/noncrack/images',views.noncrack_images_delete),
+
+
 
     # path('AMS/API/change/password',views.change_password),
     # path('AMS/API/forgot/password/token',views.forgot_password_token),
