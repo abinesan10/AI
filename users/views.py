@@ -322,13 +322,6 @@ def train_images(request):
                             loss='sparse_categorical_crossentropy',
                             metrics=['accuracy'])
 
-                print('===================================================================================================================================')
-                print('===================================================================================================================================')
-                print('=========================================== RUNNING MODEL =========================================================================')
-                print('=================================================='+ NAME + '======================================================================')
-                print('===================================================================================================================================')
-                print('===================================================================================================================================')
-
                 model.fit(X, y, epochs=8, batch_size = 32, validation_split=0.1, callbacks = [tensorboard])
 
                 model.save('3x3x64-catvsdog.model')
@@ -512,4 +505,49 @@ def project_update(request):
     update = projectname.objects.filter(id=js["projectId"]).update(projectName=js["projectName"])
     return JsonResponse({"status":"Success","message":"Updated Successfully"})
 
-# 
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def video_detect(request): 
+    js = json.loads(request.body)
+    try:
+        timeStamp = datetime.now().timestamp()
+        timeStamp = str(timeStamp).replace('.','_')
+        video_folder="/var/www/html/videos/" #"D:/var/"#
+        image_folder="/var/www/html/images/" #"D:/var/"#
+        vidcap = cv2.VideoCapture(video_folder+js["videoName"])
+        def getFrame(sec):
+            vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
+            hasFrames,image = vidcap.read()
+            if hasFrames:
+                imname=image_folder+str(count)+"_"+timeStamp+".jpg"
+                namesave=str(count)+"_"+timeStamp+".jpg"
+                cv2.imwrite(imname, image)     # save frame as JPG file
+                detect = detectiondetails(imageName=namesave,detectStatus=1,videoId=js["videoId"])
+                detect.save()
+            return hasFrames
+        sec = 0
+        frameRate = js["FramesPerSecond"] #//it will capture image in each 0.5 second
+        count=1
+        success = getFrame(sec)
+        while success:
+            count = count + 1
+            sec = sec + frameRate
+            sec = round(sec, 2)
+            success = getFrame(sec)
+        return JsonResponse({"status":"Success","message":"Frame detected Successfully"})
+    except Exception as e:
+        return JsonResponse({"status":"Failure","message":str(e)})
+
+    
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def list_detected_images(request,id):
+    project = list(detectiondetails.objects.filter(videoId=int(id)).values())
+    print("ddddddd",project)
+    path=[{"pathUrl":"http://44.233.138.4/images/","videoImagesList":project}]
+    data = {"status":"success","data":path}
+    return JsonResponse(data)

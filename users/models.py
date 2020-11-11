@@ -41,6 +41,12 @@ class projectname(models.Model):
     dates=models.DateTimeField(auto_now_add=True, blank=True)
     # videoname = jsonfield.JSONField(null=True)
     projectName = models.CharField(max_length=255)
-    projectDesc =models.TextField(null=True)
+    projectDesc = models.TextField(null=True)
 
-    
+
+class detectiondetails(models.Model):
+    dates=models.DateTimeField(auto_now_add=True, blank=True)
+    # videoname = jsonfield.JSONField(null=True)
+    imageName=models.CharField(max_length=255)
+    detectStatus = models.CharField(max_length=255,null=True)
+    videoId = models.IntegerField()
