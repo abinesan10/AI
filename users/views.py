@@ -438,7 +438,7 @@ def upload_video(request):
 #@validate
 @require_http_methods(["GET"])
 def list_video(request,id):
-    project = list(projectdetails.objects.filter(projectId=int(id)).values_list('videoName',flat=True))
+    project = list(projectdetails.objects.filter(projectId=int(id)).values())
     print("ddddddd",project)
     # for i in js["fileName"] :
     #     filepath="/var/www/html/noncrack/"+i
@@ -547,7 +547,6 @@ def video_detect(request):
 @require_http_methods(["GET"])
 def list_detected_images(request,id):
     project = list(detectiondetails.objects.filter(videoId=int(id)).values())
-    print("ddddddd",project)
     path=[{"pathUrl":"http://44.233.138.4/images/","videoImagesList":project}]
     data = {"status":"success","data":path}
     return JsonResponse(data)
