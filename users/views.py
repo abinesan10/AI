@@ -419,20 +419,27 @@ def upload_video(request):
             fileName = str(timeStamp)+file.name
             #print(fileName,"333333333")
             path = filePath.save(fileName, ContentFile(file.read()))
-            pro = projectdetails(projectName=project,videoName=fileName)
+            pro = projectdetails(projectId=project,videoName=fileName)
             pro.save()
     data = {"status":"success","message":"Image uploaded successfully"}
     return JsonResponse(data)
+
+
+
+
+
 @csrf_exempt
 #@validate
-@require_http_methods(["POST"])
-def list_video(request):
-    js = json.loads(request.body)
-    for i in js["fileName"] :
-        filepath="/var/www/html/noncrack/"+i
-        print(filepath)
-        os.remove(filepath)
-    data = {"status":"success","message":"Files Deleted successfully"}
+@require_http_methods(["GET"])
+def list_video(request,id):
+    project = list(projectdetails.objects.filter(projectId=int(id)).values_list('videoName',flat=True))
+    print("ddddddd",project)
+    # for i in js["fileName"] :
+    #     filepath="/var/www/html/noncrack/"+i
+    #     print(filepath)
+    #     os.remove(filepath)
+    path=[{"pathUrl":"http://44.233.138.4/videos/","videosList":project}]
+    data = {"status":"success","data":path}
     return JsonResponse(data)
 
 
@@ -461,27 +468,13 @@ def predict(request):
 
 
 
-            # dateField = datetime.now()
-            # js["registered_date"] = dateField.date()
-            # #print(js["registered_date"],"===============================")
-            # password = js["password"]
-            # hashPass = hash_password(password)
-            # js["password"] = str(hashPass)
-            # emailCheck = registerInfo.objects.filter(Q(email__icontains=js["email"]) | Q(mobileNumber__icontains=js["mobileNumber"]))
-            # if emailCheck.exists():
-            #     return JsonResponse({"status":"failure","message":"User already exists"})
-            # else:
-            #     registerSerializer = registerInfoSerializer(data=js)
-            #     if registerSerializer.is_valid() :
-            #         registerId = registerSerializer.save()
-            #         registerId.save()
-
+         
 @csrf_exempt
 #@validate
 @require_http_methods(["POST"])
 def project_add(request):  
     js = json.loads(request.body)
-    project = projectname.objects.filter(projectName=js["projectName"])
+    project = projectname.objects.filter(projectName=js["projectName"],projectDesc=js["projectDesc"])
     if project.exists():
         return JsonResponse({"status":"failure","message":"Project already exists"})
     else:
@@ -494,7 +487,6 @@ def project_add(request):
 #@validate
 @require_http_methods(["GET"])
 def project_list(request):  
-    
     project = list(projectname.objects.all().values())
     return JsonResponse({"status":"Success","message":"project name list","data":project})
 
@@ -507,42 +499,4 @@ def project_update(request):
     update = projectname.objects.filter(id=js["projectId"]).update(projectName=js["projectName"])
     return JsonResponse({"status":"Success","message":"Updated Successfully"})
 
-# @csrf_exempt
-# #@validate
-# @require_http_methods(["POST"])
-# def project_update(request):  
-#     js = json.loads(request.body)
-#     projectname = projectname.objects.filter(projectName=js["projectname"])
-#     if projectname.exists():
-#         return JsonResponse({"status":"failure","message":"Name already exists"})
-#     else:
-#         pro = projectname(projectName=js["projectname"])
-#         pro.save()
-#         return JsonResponse({"status":"Success","message":"Project Created Successfully!"
-
-
-# @csrf_exempt
-# #@validate
-# @require_http_methods(["POST"])
-# def project_list(request):  
-#     js = json.loads(request.body)
-#     projectname = projectname.objects.filter(projectName=js["projectname"])
-#     if projectname.exists():
-#         return JsonResponse({"status":"failure","message":"Name already exists"})
-#     else:
-#         pro = projectname(projectName=js["projectname"])
-#         pro.save()
-#         return JsonResponse({"status":"Success","message":"Project Created Successfully!"
-# @csrf_exempt
-# #@validate
-# @require_http_methods(["POST"])
-# def project_delete(request):  
-#     js = json.loads(request.body)
-#     projectname = projectname.objects.filter(projectName=js["projectname"])
-#     if projectname.exists():
-#         return JsonResponse({"status":"failure","message":"Name already exists"})
-#     else:
-#         pro = projectname(projectName=js["projectname"])
-#         pro.save()
-#         return JsonResponse({"status":"Success","message":"Project Created Successfully!"
-
+# 

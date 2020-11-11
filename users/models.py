@@ -31,7 +31,7 @@ class photoGallery(models.Model):
 class projectdetails(models.Model):
     dates=models.DateTimeField(auto_now_add=True, blank=True)
     # videoname = jsonfield.JSONField(null=True)
-    projectId = models.IntegerField(max_length=20)
+    projectId = models.IntegerField()
     videoName = models.CharField(max_length=80)
     dates=models.DateTimeField(auto_now_add=True, blank=True)
 
@@ -41,5 +41,6 @@ class projectname(models.Model):
     dates=models.DateTimeField(auto_now_add=True, blank=True)
     # videoname = jsonfield.JSONField(null=True)
     projectName = models.CharField(max_length=255)
+    projectDesc =models.TextField(null=True)
 
     
