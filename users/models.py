@@ -25,3 +25,21 @@ class photoGallery(models.Model):
     dates=models.DateTimeField(auto_now_add=True, blank=True)
     profile_picture = jsonfield.JSONField(null=True)
     image_type = models.CharField(max_length=80)
+
+
+
+class projectdetails(models.Model):
+    dates=models.DateTimeField(auto_now_add=True, blank=True)
+    # videoname = jsonfield.JSONField(null=True)
+    projectId = models.IntegerField(max_length=20)
+    videoName = models.CharField(max_length=80)
+    dates=models.DateTimeField(auto_now_add=True, blank=True)
+
+
+
+class projectname(models.Model):
+    dates=models.DateTimeField(auto_now_add=True, blank=True)
+    # videoname = jsonfield.JSONField(null=True)
+    projectName = models.CharField(max_length=255)
+
+    

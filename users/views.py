@@ -138,7 +138,7 @@ def logout(request):
 def Noncrack_photo(request):
     image_type = request.POST["ImageType"]   
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='var/html/noncrack')
+    filePath = FileSystemStorage(location='/var/html/noncrack')
     timeStamp = str(timeStamp).replace('.','_')
     # r = requests.get("https://omexon.co/images1.zip")
     # z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -166,7 +166,7 @@ def Noncrack_photo(request):
             for file in zip_file.namelist():    
                 if file.endswith(tuple(extensions)):
                     # print("dddddddd")
-                    zip_file.extract(file,'D:/Road crack Colan/images/crack')  
+                    zip_file.extract(file,'/var/html/noncrack')  
             zip_file.close()
     data = {"status":"success","message":"Image uploaded successfully"}
     return JsonResponse(data)
@@ -178,7 +178,7 @@ def Noncrack_photo(request):
 def Crack_photo(request):
     image_type = request.POST["ImageType"]   
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='var/www/html/crack')
+    filePath = FileSystemStorage(location='/var/www/html/crack')
     timeStamp = str(timeStamp).replace('.','_')
     fileUrl = []
     # print(request.FILES,"sdsddddddd")
@@ -201,18 +201,21 @@ def Crack_photo(request):
             for file in zip_file.namelist():    
                 if file.endswith(tuple(extensions)):
                     # print("dddddddd")
-                    zip_file.extract(file,'D:/Road crack Colan/images/crack')  
+                    zip_file.extract(file,'/var/www/html/crack')  
             zip_file.close()
     data = {"status":"success","message":"Image uploaded successfully"}
     return JsonResponse(data)
+
+
+    
 
 @csrf_exempt
 #@validate
 @require_http_methods(["GET"])
 def train_images(request):
+    data = []
     DIRECTORY = '/var/www/html'
     CATEGORIES = ['crack', 'noncrack']
-    data = []
     for category in CATEGORIES:
         path = os.path.join(DIRECTORY, category)
         for img in os.listdir(path):
@@ -221,20 +224,37 @@ def train_images(request):
             arr = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
             new_arr = cv2.resize(arr, (60, 60))
             data.append([new_arr, label])
+
+
     random.shuffle(data)
+
     X = []
     y = []
+
     for features, label in data:
         X.append(features)
         y.append(label)
+
     X = np.array(X)
     y = np.array(y)
+
+    import pickle
+
     pickle.dump(X, open('X.pkl', 'wb'))
     pickle.dump(y, open('y.pkl', 'wb'))
+
     X = pickle.load(open('X.pkl', 'rb'))
     y = pickle.load(open('y.pkl', 'rb'))
+
     X = X/255
+
+    X
+
     X = X.reshape(-1, 60, 60, 1)
+
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+
     model = Sequential()
 
     model.add(Conv2D(64, (3,3), activation = 'relu'))
@@ -254,11 +274,66 @@ def train_images(request):
                 metrics=['accuracy'])
 
     model.fit(X, y, epochs=5, validation_split=0.1)
+
+    import pickle
+
+    X = pickle.load(open('X.pkl', 'rb'))
+    y = pickle.load(open('y.pkl', 'rb'))
+
+    X = X/255
+
+    X = X.reshape(-1, 60, 60, 1)
+
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+
+    from tensorflow.keras.callbacks import TensorBoard
+    import time
+
+    dense_layers = [3]
+    conv_layers = [3]
+    neurons = [64]
+
+
+    for dense_layer in dense_layers:
+        for conv_layer in conv_layers:
+            for neuron in neurons:
+
+                NAME = '{}-denselayer-{}-convlayer-{}-neuron-{}'.format(dense_layer, conv_layer, neuron, int(time.time()))
+                tensorboard = TensorBoard(log_dir = 'logs2\\{}'.format(NAME))
+
+
+                model = Sequential()
+
+                for l in range(conv_layer):
+                    model.add(Conv2D(neuron, (3,3), activation = 'relu'))
+                    model.add(MaxPooling2D((2,2)))
+
+                model.add(Flatten())
+
+                model.add(Dense(neuron, input_shape = X.shape[1:], activation = 'relu'))
+
+                for l in range(dense_layer - 1):
+                    model.add(Dense(neuron, activation = 'relu'))
+
+                model.add(Dense(2, activation = 'softmax'))
+
+                model.compile(optimizer='adam',
+                            loss='sparse_categorical_crossentropy',
+                            metrics=['accuracy'])
+
+                print('===================================================================================================================================')
+                print('===================================================================================================================================')
+                print('=========================================== RUNNING MODEL =========================================================================')
+                print('=================================================='+ NAME + '======================================================================')
+                print('===================================================================================================================================')
+                print('===================================================================================================================================')
+
+                model.fit(X, y, epochs=8, batch_size = 32, validation_split=0.1, callbacks = [tensorboard])
+
+                model.save('3x3x64-catvsdog.model')
     data = {"status":"success","message":"Images trained successfully"}
     return JsonResponse(data)
-
-
-
 
 
 @csrf_exempt
@@ -274,6 +349,7 @@ def list_noncrack_images(request):
     
     data = {"status":"success","message":"File Name","data":a}
     return JsonResponse(data)
+
 
 
 @csrf_exempt
@@ -320,3 +396,153 @@ def noncrack_images_delete(request):
         os.remove(filepath)
     data = {"status":"success","message":"Files Deleted successfully"}
     return JsonResponse(data)
+
+
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def upload_video(request):   
+    project = request.POST["projectId"] 
+    timeStamp = datetime.now().timestamp()
+    filePath = FileSystemStorage(location='/var/www/html/noncrack/')
+    timeStamp = str(timeStamp).replace('.','_')
+    fileUrl = []
+    # print(request.FILES,"sdsddddddd")
+    for  i in request.FILES:
+        file = request.FILES[i] 
+        print(file,"ddddddddddddddd")
+        # print(file.name,"dddddddddddddddddddddddddddd")
+        extensions=['.mp4','.avi']
+        if file.name.endswith(tuple(extensions)):
+            fileName = str(timeStamp)+file.name
+            #print(fileName,"333333333")
+            path = filePath.save(fileName, ContentFile(file.read()))
+            pro = projectdetails(projectName=project,videoName=fileName)
+            pro.save()
+    data = {"status":"success","message":"Image uploaded successfully"}
+    return JsonResponse(data)
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def list_video(request):
+    js = json.loads(request.body)
+    for i in js["fileName"] :
+        filepath="/var/www/html/noncrack/"+i
+        print(filepath)
+        os.remove(filepath)
+    data = {"status":"success","message":"Files Deleted successfully"}
+    return JsonResponse(data)
+
+
+def image(path):
+    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    new_arr = cv2.resize(img, (60, 60))
+    new_arr = np.array(new_arr)
+    new_arr = new_arr.reshape(-1, 60, 60, 1)
+    return new_arr
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def predict(request):  
+    timeStamp = datetime.now().timestamp()
+    model = keras.models.load_model('3x3x64-catvsdog.model')
+    timeStamp = datetime.now().timestamp()
+    
+    timeStamp = str(timeStamp).replace('.','_')
+    for  i in request.FILES:
+        file = request.FILES[i] 
+        prediction = model.predict([ContentFile(file.read())])
+        print(CATEGORIES[prediction.argmax()])
+    data = {"status":"success","predicted result":CATEGORIES[prediction.argmax()]}
+    return JsonResponse(data)
+
+
+
+            # dateField = datetime.now()
+            # js["registered_date"] = dateField.date()
+            # #print(js["registered_date"],"===============================")
+            # password = js["password"]
+            # hashPass = hash_password(password)
+            # js["password"] = str(hashPass)
+            # emailCheck = registerInfo.objects.filter(Q(email__icontains=js["email"]) | Q(mobileNumber__icontains=js["mobileNumber"]))
+            # if emailCheck.exists():
+            #     return JsonResponse({"status":"failure","message":"User already exists"})
+            # else:
+            #     registerSerializer = registerInfoSerializer(data=js)
+            #     if registerSerializer.is_valid() :
+            #         registerId = registerSerializer.save()
+            #         registerId.save()
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def project_add(request):  
+    js = json.loads(request.body)
+    project = projectname.objects.filter(projectName=js["projectName"])
+    if project.exists():
+        return JsonResponse({"status":"failure","message":"Project already exists"})
+    else:
+        pro = projectname(projectName=js["projectName"])
+        pro.save()
+        return JsonResponse({"status":"Success","message":"Project Created Successfully!"})
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def project_list(request):  
+    
+    project = list(projectname.objects.all().values())
+    return JsonResponse({"status":"Success","message":"project name list","data":project})
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def project_update(request):  
+    js = json.loads(request.body)
+    update = projectname.objects.filter(id=js["projectId"]).update(projectName=js["projectName"])
+    return JsonResponse({"status":"Success","message":"Updated Successfully"})
+
+# @csrf_exempt
+# #@validate
+# @require_http_methods(["POST"])
+# def project_update(request):  
+#     js = json.loads(request.body)
+#     projectname = projectname.objects.filter(projectName=js["projectname"])
+#     if projectname.exists():
+#         return JsonResponse({"status":"failure","message":"Name already exists"})
+#     else:
+#         pro = projectname(projectName=js["projectname"])
+#         pro.save()
+#         return JsonResponse({"status":"Success","message":"Project Created Successfully!"
+
+
+# @csrf_exempt
+# #@validate
+# @require_http_methods(["POST"])
+# def project_list(request):  
+#     js = json.loads(request.body)
+#     projectname = projectname.objects.filter(projectName=js["projectname"])
+#     if projectname.exists():
+#         return JsonResponse({"status":"failure","message":"Name already exists"})
+#     else:
+#         pro = projectname(projectName=js["projectname"])
+#         pro.save()
+#         return JsonResponse({"status":"Success","message":"Project Created Successfully!"
+# @csrf_exempt
+# #@validate
+# @require_http_methods(["POST"])
+# def project_delete(request):  
+#     js = json.loads(request.body)
+#     projectname = projectname.objects.filter(projectName=js["projectname"])
+#     if projectname.exists():
+#         return JsonResponse({"status":"failure","message":"Name already exists"})
+#     else:
+#         pro = projectname(projectName=js["projectname"])
+#         pro.save()
+#         return JsonResponse({"status":"Success","message":"Project Created Successfully!"
+
