@@ -406,7 +406,7 @@ def noncrack_images_delete(request):
 def upload_video(request):   
     project = request.POST["projectId"] 
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='/var/www/html/noncrack/')
+    filePath = FileSystemStorage(location='/var/www/html/videos/')
     timeStamp = str(timeStamp).replace('.','_')
     fileUrl = []
     # print(request.FILES,"sdsddddddd")
@@ -421,7 +421,7 @@ def upload_video(request):
             path = filePath.save(fileName, ContentFile(file.read()))
             pro = projectdetails(projectId=project,videoName=fileName)
             pro.save()
-    data = {"status":"success","message":"Image uploaded successfully"}
+    data = {"status":"success","message":"Video uploaded successfully"}
     return JsonResponse(data)
 
 
