@@ -32,10 +32,13 @@ urlpatterns = [
     path('AMS/API/delete/noncrack/images',views.noncrack_images_delete),
     path('AMS/API/upload/video',views.upload_video),
     path('AMS/API/list/video/<int:id>',views.list_video),
+    path('AMS/API/delete/video',views.videos_delete),
+    path('AMS/API/project/name/list',views.project_list),
     path('AMS/API/predict/images',views.predict),
     path('AMS/API/project/name/add',views.project_add),
     path('AMS/API/project/name/update',views.project_update),
     path('AMS/API/project/name/list',views.project_list),
+
     # path('AMS/API/project/name/delete',views.project_delete),
     
 

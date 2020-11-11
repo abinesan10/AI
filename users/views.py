@@ -403,6 +403,19 @@ def noncrack_images_delete(request):
 @csrf_exempt
 #@validate
 @require_http_methods(["POST"])
+def videos_delete(request):
+    js = json.loads(request.body)
+    for i in js["fileName"] :
+        filepath="/var/www/html/videos/"+i
+        print(filepath)
+        os.remove(filepath)
+    data = {"status":"success","message":"Deleted successfully"}
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
 def upload_video(request):   
     project = request.POST["projectId"] 
     timeStamp = datetime.now().timestamp()
