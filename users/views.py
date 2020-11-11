@@ -487,11 +487,11 @@ def predict(request):
 @require_http_methods(["POST"])
 def project_add(request):  
     js = json.loads(request.body)
-    project = projectname.objects.filter(projectName=js["projectName"],projectDesc=js["projectDesc"])
+    project = projectname.objects.filter(projectName=js["projectName"])
     if project.exists():
         return JsonResponse({"status":"failure","message":"Project already exists"})
     else:
-        pro = projectname(projectName=js["projectName"])
+        pro = projectname(projectName=js["projectName"],projectDesc=js["projectDesc"])
         pro.save()
         return JsonResponse({"status":"Success","message":"Project Created Successfully!"})
 
