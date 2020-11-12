@@ -42,6 +42,7 @@ import matplotlib.pyplot as plt
 import pickle
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+from keras.preprocessing import image
 
 #### Code start's below
 
@@ -207,7 +208,8 @@ def Crack_photo(request):
     return JsonResponse(data)
 
 
-    
+
+
 
 @csrf_exempt
 #@validate
@@ -460,6 +462,7 @@ def image(path):
 #@validate
 @require_http_methods(["POST"])
 def predict(request):  
+    CATEGORIES = ['crack', 'noncrack']
     timeStamp = datetime.now().timestamp()
     model = keras.models.load_model('3x3x64-catvsdog.model')
     timeStamp = datetime.now().timestamp()
@@ -512,16 +515,28 @@ def project_update(request):
 @require_http_methods(["POST"])
 def video_detect(request): 
     js = json.loads(request.body)
+    
     try:
         timeStamp = datetime.now().timestamp()
         timeStamp = str(timeStamp).replace('.','_')
         video_folder="/var/www/html/videos/" #"D:/var/"#
         image_folder="/var/www/html/images/" #"D:/var/"#"D:/var/"
         vidcap = cv2.VideoCapture(video_folder+js["videoName"])
+        CATEGORIES = ['crack', 'noncrack']
         def getFrame(sec):
             vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
             hasFrames,image = vidcap.read()
             if hasFrames:
+                model = keras.models.load_model('3x3x64-catvsdog.model')
+                img = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+                new_arr = cv2.resize(img, (60, 60))
+                new_arr = np.array(new_arr)
+                new_arr = new_arr.reshape(-1, 60, 60, 1)
+                prediction = model.predict([new_arr])
+                if CATEGORIES[prediction.argmax()]== "crack":
+                    detectStatus=1
+                else:
+                    detectStatus=0
                 imname=image_folder+str(count)+"_"+timeStamp+".jpg"
                 namesave=str(count)+"_"+timeStamp+".jpg"
                 cv2.imwrite(imname, image)     # save frame as JPG file
@@ -551,3 +566,8 @@ def list_detected_images(request,id):
     path=[{"pathUrl":"http://44.233.138.4/images/","videoImagesList":project}]
     data = {"status":"success","data":path}
     return JsonResponse(data)
+
+
+
+
+
