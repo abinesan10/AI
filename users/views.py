@@ -412,7 +412,7 @@ def videos_delete(request):
 def upload_video(request):   
     project = request.POST["projectId"] 
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='/var/www/html/videos/')
+    filePath = FileSystemStorage(location='/var/www/html/videos/')#"D:/")
     timeStamp = str(timeStamp).replace('.','_')
     fileUrl = []
     # print(request.FILES,"sdsddddddd")
@@ -420,12 +420,12 @@ def upload_video(request):
         file = request.FILES[i] 
         print(file,"ddddddddddddddd")
         # print(file.name,"dddddddddddddddddddddddddddd")
-        extensions=['.mp4','.avi']
+        extensions=['.mp4','.avi','.mkv','.wmv']
         if file.name.endswith(tuple(extensions)):
             fileName = str(timeStamp)+file.name
             #print(fileName,"333333333")
             path = filePath.save(fileName, ContentFile(file.read()))
-            pro = projectdetails(projectId=project,videoName=fileName)
+            pro = projectdetails(projectId=project,videoName=fileName,status=0)
             pro.save()
     data = {"status":"success","message":"Video uploaded successfully"}
     return JsonResponse(data)
@@ -502,7 +502,7 @@ def project_list(request):
 @require_http_methods(["POST"])
 def project_update(request):  
     js = json.loads(request.body)
-    update = projectname.objects.filter(id=js["projectId"]).update(projectName=js["projectName"])
+    update = projectname.objects.filter(id=js["projectId"]).update(projectName=js["projectName"],projectDesc=js["projectDesc"])
     return JsonResponse({"status":"Success","message":"Updated Successfully"})
 
 
@@ -515,8 +515,8 @@ def video_detect(request):
     try:
         timeStamp = datetime.now().timestamp()
         timeStamp = str(timeStamp).replace('.','_')
-        video_folder="/var/www/html/videos/" #"D:/var/"#
-        image_folder="/var/www/html/images/" #"D:/var/"#
+        video_folder="/var/www/html/videos/" #"D:/var/"
+        image_folder="/var/www/html/images/" #"D:/var/"#"D:/var/"
         vidcap = cv2.VideoCapture(video_folder+js["videoName"])
         def getFrame(sec):
             vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
@@ -537,6 +537,7 @@ def video_detect(request):
             sec = sec + frameRate
             sec = round(sec, 2)
             success = getFrame(sec)
+        update = projectdetails.objects.filter(id=js["videoId"]).update(status=1)
         return JsonResponse({"status":"Success","message":"Frame detected Successfully"})
     except Exception as e:
         return JsonResponse({"status":"Failure","message":str(e)})

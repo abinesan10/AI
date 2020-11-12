@@ -33,6 +33,8 @@ class projectdetails(models.Model):
     # videoname = jsonfield.JSONField(null=True)
     projectId = models.IntegerField()
     videoName = models.CharField(max_length=80)
+    status = models.IntegerField(null=True)
+
     dates=models.DateTimeField(auto_now_add=True, blank=True)
 
 

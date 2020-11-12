@@ -38,9 +38,8 @@ urlpatterns = [
     path('AMS/API/project/name/add',views.project_add),
     path('AMS/API/project/name/update',views.project_update),
     path('AMS/API/project/name/list',views.project_list),
-    path('AMS/API/prjoject/video/detect',views.video_detect),
-    path('AMS/API/prjoject/list/detected/images/<int:id>',views.list_detected_images),
-
+    path('AMS/API/project/video/detect',views.video_detect),
+    path('AMS/API/project/list/detected/images/<int:id>',views.list_detected_images),
     # path('AMS/API/project/name/delete',views.project_delete),
     
 
