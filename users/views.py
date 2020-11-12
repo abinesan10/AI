@@ -515,8 +515,8 @@ def video_detect(request):
     try:
         timeStamp = datetime.now().timestamp()
         timeStamp = str(timeStamp).replace('.','_')
-        video_folder="D:/var/"#"/var/www/html/videos/" #
-        image_folder="D:/var/"#"/var/www/html/images/" #"D:/var/"#"D:/var/"
+        video_folder="/var/www/html/videos/" #"D:/var/"#
+        image_folder="/var/www/html/images/" #"D:/var/"#"D:/var/"
         vidcap = cv2.VideoCapture(video_folder+js["videoName"])
         def getFrame(sec):
             vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
