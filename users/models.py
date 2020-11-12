@@ -34,6 +34,8 @@ class projectdetails(models.Model):
     projectId = models.IntegerField()
     videoName = models.CharField(max_length=80)
     status = models.IntegerField(null=True)
+    totalFrames = models.IntegerField(null=True)
+    detectedFrames = models.IntegerField(null=True)
 
     dates=models.DateTimeField(auto_now_add=True, blank=True)
 
