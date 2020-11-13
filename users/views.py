@@ -533,7 +533,7 @@ def video_detect(request):
                 cv2.imwrite(imname, image)     # save frame as JPG file
                 model = keras.models.load_model('3x3x64-catvsdog.model')
                 img = cv2.imread(imname, cv2.IMREAD_GRAYSCALE)
-                new_arr = cv2.resize(img, (60, 60))
+                new_arr = cv2.resize(img, (120, 120))
                 new_arr = np.array(new_arr)
                 new_arr = new_arr.reshape(-1, 60, 60, 1)
                 prediction = model.predict([new_arr])
