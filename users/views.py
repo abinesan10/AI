@@ -139,7 +139,7 @@ def logout(request):
 def Noncrack_photo(request):
     image_type = request.POST["ImageType"]   
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='/var/html/noncrack')
+    filePath = FileSystemStorage(location='/var/www/html/noncrack')
     timeStamp = str(timeStamp).replace('.','_')
     # r = requests.get("https://omexon.co/images1.zip")
     # z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -167,7 +167,7 @@ def Noncrack_photo(request):
             for file in zip_file.namelist():    
                 if file.endswith(tuple(extensions)):
                     # print("dddddddd")
-                    zip_file.extract(file,'/var/html/noncrack')  
+                    zip_file.extract(file,'/var/www/html/noncrack')  
             zip_file.close()
     data = {"status":"success","message":"Image uploaded successfully"}
     return JsonResponse(data)
