@@ -527,8 +527,12 @@ def video_detect(request):
             vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
             hasFrames,image = vidcap.read()
             if hasFrames:
+                
+                imname=image_folder+str(count)+"_"+timeStamp+".jpg"
+                namesave=str(count)+"_"+timeStamp+".jpg"
+                cv2.imwrite(imname, image)     # save frame as JPG file
                 model = keras.models.load_model('3x3x64-catvsdog.model')
-                img = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+                img = cv2.imread(imname, cv2.IMREAD_GRAYSCALE)
                 new_arr = cv2.resize(img, (60, 60))
                 new_arr = np.array(new_arr)
                 new_arr = new_arr.reshape(-1, 60, 60, 1)
@@ -537,9 +541,6 @@ def video_detect(request):
                     detectStatus=1
                 else:
                     detectStatus=0
-                imname=image_folder+str(count)+"_"+timeStamp+".jpg"
-                namesave=str(count)+"_"+timeStamp+".jpg"
-                cv2.imwrite(imname, image)     # save frame as JPG file
                 detect = detectiondetails(imageName=namesave,detectStatus=detectStatus,videoId=js["videoId"])
                 detect.save()
             return hasFrames
