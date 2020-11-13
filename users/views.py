@@ -540,7 +540,7 @@ def video_detect(request):
                 imname=image_folder+str(count)+"_"+timeStamp+".jpg"
                 namesave=str(count)+"_"+timeStamp+".jpg"
                 cv2.imwrite(imname, image)     # save frame as JPG file
-                detect = detectiondetails(imageName=namesave,detectStatus=1,videoId=js["videoId"])
+                detect = detectiondetails(imageName=namesave,detectStatus=detectStatus,videoId=js["videoId"])
                 detect.save()
             return hasFrames
         sec = 0
