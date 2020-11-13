@@ -516,7 +516,7 @@ def project_update(request):
 def video_detect(request): 
     js = json.loads(request.body)
     
-    try:
+    if True:
         timeStamp = datetime.now().timestamp()
         timeStamp = str(timeStamp).replace('.','_')
         video_folder="/var/www/html/videos/" #"D:/var/"#
@@ -554,8 +554,8 @@ def video_detect(request):
             success = getFrame(sec)
         update = projectdetails.objects.filter(id=js["videoId"]).update(status=1,totalFrames=count,detectedFrames=0)
         return JsonResponse({"status":"Success","message":"Frame detected Successfully"})
-    except Exception as e:
-        return JsonResponse({"status":"Failure","message":str(e)})
+    # except Exception as e:
+    #     return JsonResponse({"status":"Failure","message":str(e)})
 
     
 @csrf_exempt
