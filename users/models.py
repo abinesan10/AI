@@ -54,3 +54,5 @@ class detectiondetails(models.Model):
     imageName=models.CharField(max_length=255)
     detectStatus = models.CharField(max_length=255,null=True)
     videoId = models.IntegerField()
+    imlat= models.FloatField()
+    imlong= models.FloatField()

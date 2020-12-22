@@ -271,7 +271,7 @@ def load_image_files(container_path, dimension=(64, 64)):
 @require_http_methods(["GET"])
 def train_images(request):
     data = []
-    DIRECTORY = 'D:/Road crack Colan/xnzhj3x8v4-2/448/train'#'/var/www/html'
+    DIRECTORY = '/var/www/html'#'D:/Road crack Colan/xnzhj3x8v4-2/448/train'#'
     print("okkkkkkkkkkkkkkkkkkkkkkkkk")
     CATEGORIES = ['crack', 'noncrack']
     image_dataset = load_image_files(DIRECTORY)
@@ -600,18 +600,38 @@ def video_detect(request):
     js = json.loads(request.body)
     
     try:
-        # img = io.imread("D:/Road crack Colan/xnzhj3x8v4-2/448/test/Cracks/IMG_20180513_170430826_HDR resized_448.jpg")    
+        #img = io.imread("D:/Road crack Colan/xnzhj3x8v4-2/448/test/Cracks/IMG_20180513_170430826_HDR resized_448.jpg")    
         timeStamp = datetime.now().timestamp()
         timeStamp = str(timeStamp).replace('.','_')
-        video_folder="D:/var/"#"/var/www/html/videos/" #
-        image_folder="D:/var/"#"/var/www/html/images/" #"D:/var/"#"D:/var/"
+        video_folder="/var/www/html/videos/" #
+        image_folder="/var/www/html/images/" #"D:/var/"#"D:/var/"
         # vidcap = cv2.VideoCapture(video_folder+js["videoName"])
         reader = imageio.get_reader(video_folder+js["videoName"])
         metadata = reader.get_meta_data()
+        gpx = gpxpy.parse(open(video_folder+js["gpxFileName"]))
+        track = gpx.tracks[0]
+        segment = track.segments[0]
+        data=[]
+        datalon = []
+        datalat = []
+        segment_length = segment.length_3d()
+        for point_idx, point in enumerate(segment.points):
+            tim=str(point.time.hour)+str(point.time.minute)+str(point.time.second)
+        #     print(tim)
+            if tim in data:
+                pass
+            else:
+                datalon.append(point.longitude)
+                datalat.append(point.latitude)
+                data.append(tim)
+
+
+      
         if metadata["fps"]<25 and metadata["fps"]>23:
             fs=24
         if metadata["fps"]<31 and metadata["fps"]>28:
             fs=30
+        poin=0
         for frame_number, im in enumerate(reader):
             # im is numpy array
             if frame_number % fs == 0:
@@ -633,8 +653,18 @@ def video_detect(request):
                 else:
                     detectStatus=0
                 print(y_pred)
-                detect = detectiondetails(imageName=namesave,detectStatus=detectStatus,videoId=js["videoId"])
-                detect.save()
+            
+                # print(datalat[poin])
+                if poin>=len(datalat):
+                    print(poin)
+                    return JsonResponse({"status":"Success","message":"Frame detected Successfully"})
+                else:
+                    detect = detectiondetails(imageName=namesave,detectStatus=detectStatus,videoId=js["videoId"],imlat=datalat[poin],imlong=datalon[poin])
+                    detect.save()
+                    print(poin)
+                    poin+=1
+                    
+                
         # CATEGORIES = ['crack', 'noncrack']
         # def getFrame(sec):
         #     vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
