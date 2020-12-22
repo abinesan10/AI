@@ -39,7 +39,7 @@ import numpy as np
 import os
 import cv2
 import imageio
-from sklearn.externals import joblib
+
 # %matplotlib inline
 import matplotlib.pyplot as plt
 import pickle
@@ -711,10 +711,5 @@ def list_detected_images(request,id):
     data = {"status":"success","data":path}
     return JsonResponse(data)
 
-
-# knn_from_joblib = joblib.load('filename.pkl')  
-  
-# # Use the loaded model to make predictions 
-# knn_from_joblib.predict(X_test) 
 
 
