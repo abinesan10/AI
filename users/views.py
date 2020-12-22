@@ -32,11 +32,14 @@ import uuid
 import hashlib
 import requests
 import requests, zipfile, io
-
+import gpxpy
+import pickle 
 ################
 import numpy as np
 import os
 import cv2
+import imageio
+from sklearn.externals import joblib
 # %matplotlib inline
 import matplotlib.pyplot as plt
 import pickle
@@ -44,6 +47,18 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
 from keras.preprocessing import image
 import keras
+from pathlib import Path
+
+from skimage import io
+# %matplotlib notebook
+from sklearn import svm, metrics, datasets
+from sklearn.utils import Bunch
+from sklearn.model_selection import GridSearchCV, train_test_split
+
+from skimage.io import imread
+from skimage.transform import resize
+
+
 #### Code start's below
 
 def hash_password(password):
@@ -208,6 +223,46 @@ def Crack_photo(request):
     return JsonResponse(data)
 
 
+def load_image_files(container_path, dimension=(64, 64)):
+    """
+    Load image files with categories as subfolder names 
+    which performs like scikit-learn sample dataset
+    
+    Parameters
+    ----------
+    container_path : string or unicode
+        Path to the main folder holding one subfolder per category
+    dimension : tuple
+        size to which image are adjusted to
+        
+    Returns
+    -------
+    Bunch
+    """
+    image_dir = Path(container_path)
+    folders = [directory for directory in image_dir.iterdir() if directory.is_dir()]
+    categories = [fo.name for fo in folders]
+
+    descr = "A image classification dataset"
+    images = []
+    flat_data = []
+    target = []
+    for i, direc in enumerate(folders):
+        for file in direc.iterdir():
+            img = io.imread(file)
+            img_resized = resize(img, dimension, anti_aliasing=True, mode='reflect')
+            flat_data.append(img_resized.flatten()) 
+            images.append(img_resized)
+            target.append(i)
+    flat_data = np.array(flat_data)
+    target = np.array(target)
+    images = np.array(images)
+
+    return Bunch(data=flat_data,
+                 target=target,
+                 target_names=categories,
+                 images=images,
+                 DESCR=descr)
 
 
 
@@ -216,119 +271,139 @@ def Crack_photo(request):
 @require_http_methods(["GET"])
 def train_images(request):
     data = []
-    DIRECTORY = '/var/www/html'
+    DIRECTORY = 'D:/Road crack Colan/xnzhj3x8v4-2/448/train'#'/var/www/html'
+    print("okkkkkkkkkkkkkkkkkkkkkkkkk")
     CATEGORIES = ['crack', 'noncrack']
-    for category in CATEGORIES:
-        path = os.path.join(DIRECTORY, category)
-        for img in os.listdir(path):
-            img_path = os.path.join(path, img)
-            label = CATEGORIES.index(category)
-            arr = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-            new_arr = cv2.resize(arr, (60, 60))
-            data.append([new_arr, label])
-
-
-    random.shuffle(data)
-
-    X = []
-    y = []
-
-    for features, label in data:
-        X.append(features)
-        y.append(label)
-
-    X = np.array(X)
-    y = np.array(y)
-
-    import pickle
-
-    pickle.dump(X, open('X.pkl', 'wb'))
-    pickle.dump(y, open('y.pkl', 'wb'))
-
-    X = pickle.load(open('X.pkl', 'rb'))
-    y = pickle.load(open('y.pkl', 'rb'))
-
-    X = X/255
-
-    X
-
-    X = X.reshape(-1, 60, 60, 1)
-
-    from tensorflow.keras.models import Sequential
-    from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
-
-    model = Sequential()
-
-    model.add(Conv2D(64, (3,3), activation = 'relu'))
-    model.add(MaxPooling2D((2,2)))
-
-    model.add(Conv2D(64, (3,3), activation = 'relu'))
-    model.add(MaxPooling2D((2,2)))
-
-    model.add(Flatten())
-
-    model.add(Dense(128, input_shape = X.shape[1:], activation = 'relu'))
-
-    model.add(Dense(2, activation = 'softmax'))
-
-    model.compile(optimizer='adam',
-                loss='sparse_categorical_crossentropy',
-                metrics=['accuracy'])
-
-    model.fit(X, y, epochs=5, validation_split=0.1)
-
-    import pickle
-
-    X = pickle.load(open('X.pkl', 'rb'))
-    y = pickle.load(open('y.pkl', 'rb'))
-
-    X = X/255
-
-    X = X.reshape(-1, 60, 60, 1)
-
-    from tensorflow.keras.models import Sequential
-    from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
-
-    from tensorflow.keras.callbacks import TensorBoard
-    import time
-
-    dense_layers = [3]
-    conv_layers = [3]
-    neurons = [64]
-
-
-    for dense_layer in dense_layers:
-        for conv_layer in conv_layers:
-            for neuron in neurons:
-
-                NAME = '{}-denselayer-{}-convlayer-{}-neuron-{}'.format(dense_layer, conv_layer, neuron, int(time.time()))
-                tensorboard = TensorBoard(log_dir = 'logs2\\{}'.format(NAME))
-
-
-                model = Sequential()
-
-                for l in range(conv_layer):
-                    model.add(Conv2D(neuron, (3,3), activation = 'relu'))
-                    model.add(MaxPooling2D((2,2)))
-
-                model.add(Flatten())
-
-                model.add(Dense(neuron, input_shape = X.shape[1:], activation = 'relu'))
-
-                for l in range(dense_layer - 1):
-                    model.add(Dense(neuron, activation = 'relu'))
-
-                model.add(Dense(2, activation = 'softmax'))
-
-                model.compile(optimizer='adam',
-                            loss='sparse_categorical_crossentropy',
-                            metrics=['accuracy'])
-
-                model.fit(X, y, epochs=8, batch_size = 32, validation_split=0.1, callbacks = [tensorboard])
-
-                model.save('3x3x64-catvsdog.model')
+    image_dataset = load_image_files(DIRECTORY)
+    X_train, X_test, y_train, y_test = train_test_split(
+    image_dataset.data, image_dataset.target, test_size=0.3,random_state=109)
+    param_grid = [
+    {'C': [1, 10, 100, 1000], 'kernel': ['linear']},
+    {'C': [1, 10, 100, 1000], 'gamma': [0.001, 0.0001], 'kernel': ['rbf']},
+     ]
+    svc = svm.SVC()
+    clf = GridSearchCV(svc, param_grid)
+    print("okkkkkkkkkkkkkkkkkkkkkkkkk")
+    clf.fit(X_train, y_train)
+    print("okkkkkkkkkkkkkkkkkkkkkkkkk")
+    pkl_filename = "pickle_model.pkl"
+    with open(pkl_filename, 'wb') as file:
+        pickle.dump(clf, file)
+    
+    print("okkkkkkkkkkkkkkkkkkkkkkkkk")
     data = {"status":"success","message":"Images trained successfully"}
     return JsonResponse(data)
+    # for category in CATEGORIES:
+    #     path = os.path.join(DIRECTORY, category)
+    #     for img in os.listdir(path):
+    #         img_path = os.path.join(path, img)
+    #         label = CATEGORIES.index(category)
+    #         arr = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+    #         new_arr = cv2.resize(arr, (60, 60))
+    #         data.append([new_arr, label])
+
+
+    # random.shuffle(data)
+
+    # X = []
+    # y = []
+
+    # for features, label in data:
+    #     X.append(features)
+    #     y.append(label)
+
+    # X = np.array(X)
+    # y = np.array(y)
+
+    # import pickle
+
+    # pickle.dump(X, open('X.pkl', 'wb'))
+    # pickle.dump(y, open('y.pkl', 'wb'))
+
+    # X = pickle.load(open('X.pkl', 'rb'))
+    # y = pickle.load(open('y.pkl', 'rb'))
+
+    # X = X/255
+
+    # X
+
+    # X = X.reshape(-1, 60, 60, 1)
+
+    # from tensorflow.keras.models import Sequential
+    # from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+
+    # model = Sequential()
+
+    # model.add(Conv2D(64, (3,3), activation = 'relu'))
+    # model.add(MaxPooling2D((2,2)))
+
+    # model.add(Conv2D(64, (3,3), activation = 'relu'))
+    # model.add(MaxPooling2D((2,2)))
+
+    # model.add(Flatten())
+
+    # model.add(Dense(128, input_shape = X.shape[1:], activation = 'relu'))
+
+    # model.add(Dense(2, activation = 'softmax'))
+
+    # model.compile(optimizer='adam',
+    #             loss='sparse_categorical_crossentropy',
+    #             metrics=['accuracy'])
+
+    # model.fit(X, y, epochs=5, validation_split=0.1)
+
+    # import pickle
+
+    # X = pickle.load(open('X.pkl', 'rb'))
+    # y = pickle.load(open('y.pkl', 'rb'))
+
+    # X = X/255
+
+    # X = X.reshape(-1, 60, 60, 1)
+
+    # from tensorflow.keras.models import Sequential
+    # from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+
+    # from tensorflow.keras.callbacks import TensorBoard
+    # import time
+
+    # dense_layers = [3]
+    # conv_layers = [3]
+    # neurons = [64]
+
+
+    # for dense_layer in dense_layers:
+    #     for conv_layer in conv_layers:
+    #         for neuron in neurons:
+
+    #             NAME = '{}-denselayer-{}-convlayer-{}-neuron-{}'.format(dense_layer, conv_layer, neuron, int(time.time()))
+    #             tensorboard = TensorBoard(log_dir = 'logs2\\{}'.format(NAME))
+
+
+    #             model = Sequential()
+
+    #             for l in range(conv_layer):
+    #                 model.add(Conv2D(neuron, (3,3), activation = 'relu'))
+    #                 model.add(MaxPooling2D((2,2)))
+
+    #             model.add(Flatten())
+
+    #             model.add(Dense(neuron, input_shape = X.shape[1:], activation = 'relu'))
+
+    #             for l in range(dense_layer - 1):
+    #                 model.add(Dense(neuron, activation = 'relu'))
+
+    #             model.add(Dense(2, activation = 'softmax'))
+
+    #             model.compile(optimizer='adam',
+    #                         loss='sparse_categorical_crossentropy',
+    #                         metrics=['accuracy'])
+
+    #             model.fit(X, y, epochs=8, batch_size = 32, validation_split=0.1, callbacks = [tensorboard])
+
+    #             model.save('3x3x64-catvsdog.model')
+    # data = {"status":"success","message":"Images trained successfully"}
+    # return JsonResponse(data)
 
 
 @csrf_exempt
@@ -414,21 +489,30 @@ def videos_delete(request):
 def upload_video(request):   
     project = request.POST["projectId"] 
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='/var/www/html/videos/')#"D:/")
+    filePath = FileSystemStorage(location="D:/var/")#'/var/www/html/videos/')#"D:/")
     timeStamp = str(timeStamp).replace('.','_')
     fileUrl = []
     # print(request.FILES,"sdsddddddd")
+    tmst = str(timeStamp)
     for  i in request.FILES:
+        print(i,"kkkkkkkkkkkkkkkk")
         file = request.FILES[i] 
-        print(file,"ddddddddddddddd")
-        # print(file.name,"dddddddddddddddddddddddddddd")
-        extensions=['.mp4','.avi','.mkv','.wmv']
+        print(file,"dddddddddddddddkkkkkkkk")
+        print(file.name,"dddddddddddddddddddddddddddd")
+        extensions=['.mp4','.avi','.mkv','.wmv','.MP4']
+        exten=['.gpx']
         if file.name.endswith(tuple(extensions)):
-            fileName = str(timeStamp)+file.name
-            #print(fileName,"333333333")
-            path = filePath.save(fileName, ContentFile(file.read()))
-            pro = projectdetails(projectId=project,videoName=fileName,status=0)
-            pro.save()
+            videofileName = tmst+file.name
+            fileName=videofileName
+            print(videofileName,"333333333")
+        if file.name.endswith(tuple(exten)):
+            gpxfileName = tmst+file.name
+            fileName=gpxfileName
+            print(gpxfileName,"333333333")
+        path = filePath.save(fileName, ContentFile(file.read()))
+    print("llllllllllllll")
+    pro = projectdetails(projectId=project,videoName=videofileName,status=0,gpxFile=gpxfileName)
+    pro.save()
     data = {"status":"success","message":"Video uploaded successfully"}
     return JsonResponse(data)
 
@@ -509,54 +593,83 @@ def project_update(request):
     return JsonResponse({"status":"Success","message":"Updated Successfully"})
 
 
-
 @csrf_exempt
 #@validate
 @require_http_methods(["POST"])
 def video_detect(request): 
     js = json.loads(request.body)
     
-    if True:
+    try:
+        # img = io.imread("D:/Road crack Colan/xnzhj3x8v4-2/448/test/Cracks/IMG_20180513_170430826_HDR resized_448.jpg")    
         timeStamp = datetime.now().timestamp()
         timeStamp = str(timeStamp).replace('.','_')
-        video_folder="/var/www/html/videos/" #"D:/var/"#
-        image_folder="/var/www/html/images/" #"D:/var/"#"D:/var/"
-        vidcap = cv2.VideoCapture(video_folder+js["videoName"])
-        CATEGORIES = ['crack', 'noncrack']
-        def getFrame(sec):
-            vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
-            hasFrames,image = vidcap.read()
-            if hasFrames:
-                
-                imname=image_folder+str(count)+"_"+timeStamp+".jpg"
-                namesave=str(count)+"_"+timeStamp+".jpg"
-                cv2.imwrite(imname, image)     # save frame as JPG file
-                # model = keras.models.load_model('3x3x64-catvsdog.model')
-                # img = cv2.imread(imname, cv2.IMREAD_GRAYSCALE)
-                # new_arr = cv2.resize(img, (120, 120))
-                # new_arr = np.array(new_arr)
-                # new_arr = new_arr.reshape(-1, 60, 60, 1)
+        video_folder="D:/var/"#"/var/www/html/videos/" #
+        image_folder="D:/var/"#"/var/www/html/images/" #"D:/var/"#"D:/var/"
+        # vidcap = cv2.VideoCapture(video_folder+js["videoName"])
+        reader = imageio.get_reader(video_folder+js["videoName"])
+        metadata = reader.get_meta_data()
+        if metadata["fps"]<25 and metadata["fps"]>23:
+            fs=24
+        if metadata["fps"]<31 and metadata["fps"]>28:
+            fs=30
+        for frame_number, im in enumerate(reader):
+            # im is numpy array
+            if frame_number % fs == 0:
+                imname=image_folder+str(frame_number)+"_"+timeStamp+".jpg"
+                namesave=str(frame_number)+"_"+timeStamp+".jpg"
+                imageio.imwrite(imname,im)
+                img_resized = resize(im, (64,64), anti_aliasing=True, mode='reflect')
+                p=img_resized.flatten()
+                pkl_filename = "pickle_model.pkl"
+                with open(pkl_filename, 'rb') as file:
+                    pickle_model = pickle.load(file)
+                print("okkkkkkkkkkkkkkkkkk")
+                y_pred = pickle_model.predict([p])
+                print(y_pred,"dddddddddddddddddddd")
+                if y_pred ==0:
+                    detectStatus=1
+                if y_pred ==1:
+                    detectStatus=0   
+                else:
+                    detectStatus=0
+                print(y_pred)
+                detect = detectiondetails(imageName=namesave,detectStatus=detectStatus,videoId=js["videoId"])
+                detect.save()
+        # CATEGORIES = ['crack', 'noncrack']
+        # def getFrame(sec):
+        #     vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
+        #     hasFrames,image = vidcap.read()
+        #     if hasFrames:
+        #         imname=image_folder+str(count)+"_"+timeStamp+".jpg"
+        #         namesave=str(count)+"_"+timeStamp+".jpg"
+        #         cv2.imwrite(imname, image)     # save frame as JPG file
+        #         # model = keras.models.load_model('3x3x64-catvsdog.model')
+        #         img = cv2.imread(imname, cv2.IMREAD_GRAYSCALE)
+        #         new_arr = cv2.resize(img, (60, 60))
+        #         new_arr = np.array(new_arr)
+        #         new_arr = new_arr.reshape(-1, 60, 60, 1)
                 # prediction = model.predict([new_arr])
                 # if CATEGORIES[prediction.argmax()]== "crack":
                 #     detectStatus=1
                 # else:
                 #     detectStatus=0
-                detect = detectiondetails(imageName=namesave,detectStatus=0,videoId=js["videoId"])
-                detect.save()
-            return hasFrames
-        sec = 0
-        frameRate = js["FramesPerSecond"] #//it will capture image in each 0.5 second
-        count=1
-        success = getFrame(sec)
-        while success:
-            count = count + 1
-            sec = sec + frameRate
-            sec = round(sec, 2)
-            success = getFrame(sec)
-        update = projectdetails.objects.filter(id=js["videoId"]).update(status=1,totalFrames=count,detectedFrames=0)
+                # print(detectStatus)
+                # detect = detectiondetails(imageName=namesave,detectStatus=0,videoId=js["videoId"])
+                # detect.save()
+            # return hasFrames
+        # sec = 0
+        # frameRate = js["FramesPerSecond"] #//it will capture image in each 0.5 second
+        # count=1
+        # success = getFrame(sec)
+        # while success:
+        #     count = count + 1
+        #     sec = sec + frameRate
+        #     sec = round(sec, 2)
+        #     success = getFrame(sec)
+        # update = projectdetails.objects.filter(id=js["videoId"]).update(status=1,totalFrames=count,detectedFrames=0)
         return JsonResponse({"status":"Success","message":"Frame detected Successfully"})
-    # except Exception as e:
-    #     return JsonResponse({"status":"Failure","message":str(e)})
+    except Exception as e:
+        return JsonResponse({"status":"Failure","message":str(e)})
 
     
 @csrf_exempt
@@ -569,6 +682,9 @@ def list_detected_images(request,id):
     return JsonResponse(data)
 
 
-
+# knn_from_joblib = joblib.load('filename.pkl')  
+  
+# # Use the loaded model to make predictions 
+# knn_from_joblib.predict(X_test) 
 
 
