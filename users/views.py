@@ -489,7 +489,7 @@ def videos_delete(request):
 def upload_video(request):   
     project = request.POST["projectId"] 
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location="/var/www/html/videos/")#'/var/www/html/videos/')#"D:/")
+    filePath = FileSystemStorage(location="D:/var/")#'/var/www/html/videos/')#"D:/")
     timeStamp = str(timeStamp).replace('.','_')
     fileUrl = []
     # print(request.FILES,"sdsddddddd")
