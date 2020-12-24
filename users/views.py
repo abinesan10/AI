@@ -43,10 +43,10 @@ import imageio
 # %matplotlib inline
 import matplotlib.pyplot as plt
 import pickle
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
-from keras.preprocessing import image
-import keras
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+# from keras.preprocessing import image
+# import keras
 from pathlib import Path
 
 from skimage import io
