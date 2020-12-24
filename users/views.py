@@ -546,16 +546,16 @@ def image(path):
 #@validate
 @require_http_methods(["POST"])
 def predict(request):  
-    CATEGORIES = ['crack', 'noncrack']
-    timeStamp = datetime.now().timestamp()
-    model = keras.models.load_model('3x3x64-catvsdog.model')
-    timeStamp = datetime.now().timestamp()
+    # CATEGORIES = ['crack', 'noncrack']
+    # timeStamp = datetime.now().timestamp()
+    # model = keras.models.load_model('3x3x64-catvsdog.model')
+    # timeStamp = datetime.now().timestamp()
     
-    timeStamp = str(timeStamp).replace('.','_')
-    for  i in request.FILES:
-        file = request.FILES[i] 
-        prediction = model.predict([ContentFile(file.read())])
-        print(CATEGORIES[prediction.argmax()])
+    # timeStamp = str(timeStamp).replace('.','_')
+    # for  i in request.FILES:
+    #     file = request.FILES[i] 
+    #     prediction = model.predict([ContentFile(file.read())])
+    #     print(CATEGORIES[prediction.argmax()])
     data = {"status":"success","predicted result":CATEGORIES[prediction.argmax()]}
     return JsonResponse(data)
 
