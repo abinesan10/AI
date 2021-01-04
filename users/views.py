@@ -488,7 +488,7 @@ def videos_delete(request):
 @require_http_methods(["POST"])
 def upload_video(request):   
     project = request.POST["projectId"] 
-    timeStamp = datetime.now().timestamp()
+    timeStamp = datetime.now().timestamp() 
     filePath = FileSystemStorage(location="D:/var/")#'/var/www/html/videos/')#"D:/")
     timeStamp = str(timeStamp).replace('.','_')
     fileUrl = []
