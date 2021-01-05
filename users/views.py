@@ -696,7 +696,7 @@ def video_detect(request):
         #     sec = sec + frameRate
         #     sec = round(sec, 2)
         #     success = getFrame(sec)
-        # update = projectdetails.objects.filter(id=js["videoId"]).update(status=1,totalFrames=count,detectedFrames=0)
+        update = projectdetails.objects.filter(id=js["videoId"]).update(status=1,totalFrames=poin,detectedFrames=0)
         return JsonResponse({"status":"Success","message":"Frame detected Successfully"})
     except Exception as e:
         return JsonResponse({"status":"Failure","message":str(e)})
