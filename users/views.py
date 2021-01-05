@@ -614,6 +614,7 @@ def video_detect(request):
         data=[]
         datalon = []
         datalat = []
+        o=0
         segment_length = segment.length_3d()
         for point_idx, point in enumerate(segment.points):
             tim=str(point.time.hour)+str(point.time.minute)+str(point.time.second)
@@ -648,6 +649,7 @@ def video_detect(request):
                 print(y_pred,"dddddddddddddddddddd")
                 if y_pred ==0:
                     detectStatus=1
+                    o+=1
                 if y_pred ==1:
                     detectStatus=0   
                 else:
@@ -696,7 +698,7 @@ def video_detect(request):
         #     sec = sec + frameRate
         #     sec = round(sec, 2)
         #     success = getFrame(sec)
-        update = projectdetails.objects.filter(id=js["videoId"]).update(status=1,totalFrames=poin,detectedFrames=0)
+        update = projectdetails.objects.filter(id=js["videoId"]).update(status=1,totalFrames=poin,detectedFrames=o)
         return JsonResponse({"status":"Success","message":"Frame detected Successfully"})
     except Exception as e:
         return JsonResponse({"status":"Failure","message":str(e)})
