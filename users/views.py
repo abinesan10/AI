@@ -653,7 +653,7 @@ def video_detect(request):
                 if y_pred ==1:
                     detectStatus=0   
                 else:
-                    detectStatus=2
+                    detectStatus=0
                 print(y_pred)
             
                 # print(datalat[poin])
