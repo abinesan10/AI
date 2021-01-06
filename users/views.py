@@ -717,11 +717,9 @@ def list_detected_images(request,id):
 #@validate
 @require_http_methods(["GET"])
 def dashboard(request,id):
-   
     viewid=list(projectdetails.objects.filter(projectId=id).values_list('id',flat=True))
-    profilelist = list(detectiondetails.objects.filter(videoId__in=[viewid]).values('imlat','imlong'))
-    return JsonResponse({"status":"success","message":"retrived successfully","userList":profilelist})
+    profilelist = list(detectiondetails.objects.filter(videoId__in=viewid).values('imlat','imlong'))
+    detectresult = list(detectiondetails.objects.filter(videoId__in=viewid,detectStatus=0).values('imlat','imlong'))
+    return JsonResponse({"status":"success","message":"retrived successfully","data":{"videoCount":len(viewid),"totalFrames":len(profilelist),"detectResult":len(detectresult),"location":profilelist}})
     
-
-
 
