@@ -39,6 +39,7 @@ urlpatterns = [
     path('AMS/API/project/name/update',views.project_update),
     path('AMS/API/project/name/list',views.project_list),
     path('AMS/API/project/video/detect',views.video_detect),
+    path('AMS/API/project/dashboard/details/<int:id>',views.dashboard),
     path('AMS/API/project/list/detected/images/<int:id>',views.list_detected_images),
     # path('AMS/API/project/name/delete',views.project_delete),
     

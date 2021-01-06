@@ -653,7 +653,7 @@ def video_detect(request):
                 if y_pred ==1:
                     detectStatus=0   
                 else:
-                    detectStatus=0
+                    detectStatus=2
                 print(y_pred)
             
                 # print(datalat[poin])
@@ -712,6 +712,16 @@ def list_detected_images(request,id):
     path=[{"pathUrl":"http://44.233.138.4/images/","videoImagesList":project}]
     data = {"status":"success","data":path}
     return JsonResponse(data)
+
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def dashboard(request,id):
+   
+    viewid=list(projectdetails.objects.filter(projectId=id).values_list('id',flat=True))
+    profilelist = list(detectiondetails.objects.filter(videoId__in=[viewid]).values('imlat','imlong'))
+    return JsonResponse({"status":"success","message":"retrived successfully","userList":profilelist})
+    
 
 
 
