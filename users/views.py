@@ -151,6 +151,81 @@ def logout(request):
 @csrf_exempt
 #@validate
 @require_http_methods(["POST"])
+def add_image_category(request):
+    category_name = request.POST["categoryName"]   
+    if not os.path.exists('/var/www/html/'+category_name):
+        os.makedirs('/var/www/html/'+category_name)
+        data = {"status":"success","message":"Category added successfully"} 
+    else:
+        data = {"status":"Failure","message":"Category Already exsit"} 
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def rename_image_category(request):
+    category_name = request.POST["categoryName"]
+    new_name = request.POST["newName"]   
+    os.rename('/var/www/html/'+category_name, '/var/www/html/'+new_name)
+    data = {"status":"success","message":"Category renamed successfully"} 
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def list_category(request):
+    arr = os.listdir('/var/www/html/')
+    data = {"status":"success","data":arr} 
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def train_image_upload(request):
+    image_type = request.POST["categoryType"]   
+    timeStamp = datetime.now().timestamp()
+    filePath = FileSystemStorage(location='/var/www/html/'+image_type)
+    # filePath = FileSystemStorage(location='D:/Road crack Colan/'+image_type)
+    timeStamp = str(timeStamp).replace('.','_')
+    # r = requests.get("https://omexon.co/images1.zip")
+    # z = zipfile.ZipFile(io.BytesIO(r.content))
+    print('Extracting all the files now...') 
+    # z.extractall("D:/Road crack Colan/images/zip")
+    print('Done!') 
+    fileUrl = []
+    # print(request.FILES,"sdsddddddd")
+    for  i in request.FILES:
+        file = request.FILES[i] 
+        print(file,"ddddddddddddddd")
+        # print(file.name,"dddddddddddddddddddddddddddd")
+        extensions=['.png','.jpg']
+        if file.name.endswith(tuple(extensions)):
+            fileName = get_random_string(5)+str(timeStamp)+".png"
+            #print(fileName,"333333333")
+            path = filePath.save(fileName, ContentFile(file.read()))
+            fileUrl.append(fileName)
+            img = photoGallery(image_type=image_type,profile_picture=fileUrl)
+            img.save()
+        
+        if file.name.endswith('.zip'):
+            print ('File is a ZIP')
+            zip_file = zipfile.ZipFile(file, 'r')
+            for file in zip_file.namelist():    
+                if file.endswith(tuple(extensions)):
+                    # print("dddddddd")
+                    zip_file.extract(file,'/var/www/html/'+image_type)  
+                    # zip_file.extract(file,'D:/Road crack Colan/'+image_type)  
+            zip_file.close()
+    data = {"status":"success","message":"Image uploaded successfully"}
+    return JsonResponse(data)
+
+
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
 def Noncrack_photo(request):
     image_type = request.POST["ImageType"]   
     timeStamp = datetime.now().timestamp()
