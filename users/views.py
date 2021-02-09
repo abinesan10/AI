@@ -348,7 +348,8 @@ def train_images(request):
     data = []
     DIRECTORY = '/var/www/html'#'D:/Road crack Colan/xnzhj3x8v4-2/448/train'#'
     print("okkkkkkkkkkkkkkkkkkkkkkkkk")
-    CATEGORIES = ['crack', 'noncrack']
+    CATEGORIES = os.listdir('/var/www/html')
+    #['crack', 'noncrack']
     image_dataset = load_image_files(DIRECTORY)
     X_train, X_test, y_train, y_test = train_test_split(
     image_dataset.data, image_dataset.target, test_size=0.3,random_state=109)
@@ -480,6 +481,21 @@ def train_images(request):
     # data = {"status":"success","message":"Images trained successfully"}
     # return JsonResponse(data)
 
+
+@csrf_exempt
+#@validate
+@require_http_methods(["GET"])
+def list_images(request,type):
+    a=[]
+    # os.listdir('D:/Road crack Colan/'+str(type)):
+    for i in os.listdir('/var/www/html/'+str(type)):
+        # print(i)
+        url="http://44.233.138.4/"+type+"/"+i
+        print(url)
+        a.append(url)
+    
+    data = {"status":"success","message":"File Name","data":a}
+    return JsonResponse(data)
 
 @csrf_exempt
 #@validate
