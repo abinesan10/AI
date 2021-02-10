@@ -46,6 +46,7 @@ urlpatterns = [
     path('AMS/API/project/dashboard/details/<int:id>',views.dashboard),
     path('AMS/API/project/list/detected/images/<int:id>',views.list_detected_images),
     path('AMS/API/project/list/images/<str:type>',views.list_images),
+    path('AMS/API/delete/images',views.images_delete),
     
     # path('AMS/API/project/name/delete',views.project_delete),
     

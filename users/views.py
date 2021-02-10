@@ -541,6 +541,21 @@ def crack_images_delete(request):
     data = {"status":"success","message":"Files Deleted successfully"}
     return JsonResponse(data)
 
+    
+@csrf_exempt
+#@validate
+@require_http_methods(["POST"])
+def images_delete(request):
+    js = json.loads(request.body)
+    categoryName=js["categoryName"]
+    for i in js["fileName"] :
+        filepath="/var/www/html/"+categoryName+"/"+i
+        print(filepath)
+        os.remove(filepath)
+    data = {"status":"success","message":"Files Deleted successfully"}
+    return JsonResponse(data)
+
+    
 
 
 
