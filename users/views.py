@@ -58,6 +58,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from skimage.io import imread
 from skimage.transform import resize
 
+TRAIN_DATA_PATH ="/var/www/html/traindata/"
 
 #### Code start's below
 
@@ -153,8 +154,8 @@ def logout(request):
 @require_http_methods(["POST"])
 def add_image_category(request):
     category_name = request.POST["categoryName"]   
-    if not os.path.exists('/var/www/html/'+category_name):
-        os.makedirs('/var/www/html/'+category_name)
+    if not os.path.exists(TRAIN_DATA_PATH+category_name):
+        os.makedirs(TRAIN_DATA_PATH+category_name)
         data = {"status":"success","message":"Category added successfully"} 
     else:
         data = {"status":"Failure","message":"Category Already exsit"} 
@@ -167,7 +168,7 @@ def add_image_category(request):
 def rename_image_category(request):
     category_name = request.POST["categoryName"]
     new_name = request.POST["newName"]   
-    os.rename('/var/www/html/'+category_name, '/var/www/html/'+new_name)
+    os.rename(TRAIN_DATA_PATH+category_name, TRAIN_DATA_PATH+new_name)
     data = {"status":"success","message":"Category renamed successfully"} 
     return JsonResponse(data)
 
@@ -176,7 +177,7 @@ def rename_image_category(request):
 #@validate
 @require_http_methods(["GET"])
 def list_category(request):
-    arr = os.listdir('/var/www/html/')
+    arr = os.listdir(TRAIN_DATA_PATH)
     data = {"status":"success","data":arr} 
     return JsonResponse(data)
 
@@ -187,7 +188,7 @@ def list_category(request):
 def train_image_upload(request):
     image_type = request.POST["categoryType"]   
     timeStamp = datetime.now().timestamp()
-    filePath = FileSystemStorage(location='/var/www/html/'+image_type)
+    filePath = FileSystemStorage(location=TRAIN_DATA_PATH+image_type)
     # filePath = FileSystemStorage(location='D:/Road crack Colan/'+image_type)
     timeStamp = str(timeStamp).replace('.','_')
     # r = requests.get("https://omexon.co/images1.zip")
@@ -216,7 +217,7 @@ def train_image_upload(request):
             for file in zip_file.namelist():    
                 if file.endswith(tuple(extensions)):
                     # print("dddddddd")
-                    zip_file.extract(file,'/var/www/html/'+image_type)  
+                    zip_file.extract(file,TRAIN_DATA_PATH+image_type)  
                     # zip_file.extract(file,'D:/Road crack Colan/'+image_type)  
             zip_file.close()
     data = {"status":"success","message":"Image uploaded successfully"}
@@ -346,11 +347,12 @@ def load_image_files(container_path, dimension=(64, 64)):
 @require_http_methods(["GET"])
 def train_images(request):
     data = []
-    DIRECTORY = '/var/www/html'#'D:/Road crack Colan/xnzhj3x8v4-2/448/train'#'
+    DIRECTORY = TRAIN_DATA_PATH #'D:/Road crack Colan/xnzhj3x8v4-2/448/train'#'
     print("okkkkkkkkkkkkkkkkkkkkkkkkk")
-    CATEGORIES = os.listdir('/var/www/html')
+    CATEGORIES = os.listdir(TRAIN_DATA_PATH)
     #['crack', 'noncrack']
     image_dataset = load_image_files(DIRECTORY)
+    print(image_dataset,"ooooooooooo",image_dataset["target_names"])
     X_train, X_test, y_train, y_test = train_test_split(
     image_dataset.data, image_dataset.target, test_size=0.3,random_state=109)
     param_grid = [
@@ -731,9 +733,6 @@ def video_detect(request):
                 datalon.append(point.longitude)
                 datalat.append(point.latitude)
                 data.append(tim)
-
-
-      
         if metadata["fps"]<25 and metadata["fps"]>23:
             fs=24
         if metadata["fps"]<31 and metadata["fps"]>28:
@@ -753,14 +752,16 @@ def video_detect(request):
                 print("okkkkkkkkkkkkkkkkkk")
                 y_pred = pickle_model.predict([p])
                 print(y_pred,"dddddddddddddddddddd")
-                if y_pred ==0:
-                    detectStatus=1
-                    o+=1
-                if y_pred ==1:
-                    detectStatus=0   
-                else:
-                    detectStatus=0
-                print(y_pred)
+                list_dir=os.listdir(TRAIN_DATA_PATH)
+                detectStatus=list_dir[y_pred[0]]
+                # if y_pred ==0:
+                #     detectStatus=1
+                #     o+=1
+                # if y_pred ==1:
+                #     detectStatus=0   
+                # else:
+                #     detectStatus=0
+                # print(y_pred)
             
                 # print(datalat[poin])
                 if poin>=len(datalat):
